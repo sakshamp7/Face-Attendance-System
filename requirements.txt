@@ -1,0 +1,8 @@
+flask
+gunicorn
+numpy
+opencv-contrib-python-headless
+gspread
+oauth2client
+faiss-cpu
+mediapipe

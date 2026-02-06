@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Face Attendance Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background: #0f172a;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: #1e293b;
+            border-bottom: 2px solid #3b82f6;
+            padding: 1rem;
+        }
+
+        .nav-title {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .camera-section {
+            position: relative;
+            border: 4px solid #1e293b;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: black;
+        }
+
+        /* Video and Canvas stacked */
+        #video,
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Mirror video for natural feel */
+        #video {
+            transform: scaleX(-1);
+        }
+
+        /* Canvas on top for drawing boxes */
+        #canvas {
+            z-index: 10;
+        }
+
+        .stats-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid #3b82f6;
+            height: 100%;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .label {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #f8fafc;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Hidden canvas for capturing frames */
+        #captureCanvas {
+            display: none;
+        }
+
+        /* Registration Form */
+        .reg-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-top: 4px solid #8b5cf6;
+        }
+
+        .btn-register {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-register:hover {
+            background: #7c3aed;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar mb-4">
+        <div class="container">
+            <span class="navbar-brand nav-title">CODELINE.AI ATTENDANCE SYSTEM</span>
+            <div class="d-flex align-items-center">
+                <span class="status-indicator"></span>
+                <span class="text-success fw-bold">SYSTEM LIVE</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="camera-section">
+                    <!-- Browser Camera Feed -->
+                    <video id="video" autoplay playsinline muted></video>
+                    <!-- Overlay for face boxes -->
+                    <canvas id="canvas"></canvas>
+                </div>
+
+                <!-- Registration Area -->
+                <div class="reg-card">
+                    <h5><i class="bi bi-person-plus-fill"></i> New User Registration</h5>
+                    <div class="input-group mt-3">
+                        <input type="text" id="username" class="form-control bg-dark text-white border-secondary"
+                            placeholder="Enter Full Name">
+                        <button class="btn btn-register" onclick="registerUser()">Capture & Register</button>
+                    </div>
+                    <small class="text-muted">Look at the camera and click register. System will capture your face
+                        automatically.</small>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="stats-card">
+                            <div class="label">Detected Identity</div>
+                            <div id="name" class="value text-primary">Scanning...</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="stats-card" style="border-left-color: #eab308;">
+                            <div class="label">Time Captured</div>
+                            <div id="time" class="value">--:--:--</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="stats-card" style="border-left-color: #ec4899;">
+                            <div class="label">Current Date</div>
+                            <div id="date" class="value">--/--/----</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="stats-card" style="border-left-color: #22c55e;">
+                            <div class="label">Sheet Sync Status</div>
+                            <div class="value" style="font-size: 1rem;">ACTIVE & SECURED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer text-center">
+            <p>&copy; 2026 AI Vision Systems | Automated Attendance Terminal</p>
+        </div>
+    </div>
+
+    <!-- Hidden canvas for resizing/sending frames -->
+    <canvas id="captureCanvas"></canvas>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
