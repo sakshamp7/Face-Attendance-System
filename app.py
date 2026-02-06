@@ -12,11 +12,14 @@ from datetime import datetime
 app = Flask(__name__)
 
 # --- CONFIG ---
-DATASET_PATH = 'dataset'
-ENCODINGS_FILE = 'encodings.pickle'
+# --- CONFIG ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATASET_PATH = os.path.join(BASE_DIR, 'dataset')
+ENCODINGS_FILE = os.path.join(BASE_DIR, 'encodings.pickle')
 SHEET_ID = "1kMbG_96D552CcXQcijLVH8ggFQxN8qLRbZdL1N-6oTc"
-DETECTION_MODEL = "models/face_detection_yunet_2023mar.onnx"
-RECOGNITION_MODEL = "models/face_recognition_sface_2021dec.onnx"
+
+DETECTION_MODEL = os.path.join(BASE_DIR, "models", "face_detection_yunet_2023mar.onnx")
+RECOGNITION_MODEL = os.path.join(BASE_DIR, "models", "face_recognition_sface_2021dec.onnx")
 
 # Anti-Spam Cache
 recently_marked = {}
